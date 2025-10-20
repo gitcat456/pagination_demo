@@ -13,4 +13,40 @@ const generateMockPosts = () => {
 };
 
 const mockPosts = generateMockPosts();
-console.log(mockPosts);
+
+exports.getPosts = (req, res) => {
+    try {
+        //get query params with default values
+        const page = parseInt(req.query.page) || 1;  //convert the query string into an int
+        const limit = parseInt(req.query.limit) || 10;
+
+        //calculate pagination values
+        const startIndex = (page - 1) * limit;  
+        const endIndex = page * limit;
+
+        //get posts for current project
+        const posts = mockPosts.slice(startIndex, endIndex)
+
+        //response
+        const response = {
+            success: true,
+            data: posts,
+            pagination: {
+                currentPage: page,
+                pageSize: limit,
+                totalPages: Math.ceil(mockPosts.length / limit),
+                totalItems: mockPosts.length,
+                hasNext: endIndex < mockPosts.length,
+                hasPrev: startIndex > 0
+            }
+        };
+
+        res.status(200).json(response)
+
+    }catch (error) {
+        res.status(500).json({
+            success:false,
+            message: 'Server Error'
+        });
+    }
+};
