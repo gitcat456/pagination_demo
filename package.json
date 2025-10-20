@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon server.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "gitcat456",
   "license": "ISC",
-  "description": "",
+  "description": "A project to demonstrate pagination concept",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^5.1.0"
