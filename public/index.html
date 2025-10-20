@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Pagination Demo</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .post { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .pagination { margin: 20px 0; text-align: center; }
+        .pagination button { margin: 0 5px; padding: 8px 15px; cursor: pointer; }
+        .pagination span { margin: 0 10px; }
+        .loading { color: #666; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1> Simple Pagination Demo</h1>
+    
+    <div>
+        <label>Posts per page: </label>
+        <select id="limitSelect">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="20">20</option>
+        </select>
+    </div>
+
+    <div id="postsContainer">
+        <div class="loading">Loading posts...</div>
+    </div>
+
+    <div id="pagination" class="pagination"></div>
+
+    <script>
+        let currentPage = 1;
+        let currentLimit = 10;
+
+        // Load posts when page loads
+        window.onload = loadPosts;
+
+        // Event listeners
+        document.getElementById('limitSelect').addEventListener('change', function() {
+            currentLimit = parseInt(this.value);
+            currentPage = 1;
+            loadPosts();
+        });
+
+        async function loadPosts() {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '<div class="loading">Loading posts...</div>';
+
+            try {
+                const response = await fetch(`/api/posts?page=${currentPage}&limit=${currentLimit}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    displayPosts(data);
+                    setupPagination(data.pagination);
+                }
+            } catch (error) {
+                container.innerHTML = '<div>Error loading posts</div>';
+            }
+        }
+
+        function displayPosts(data) {
+            const container = document.getElementById('postsContainer');
+            
+            if (data.data.length === 0) {
+                container.innerHTML = '<div>No posts found</div>';
+                return;
+            }
+
+            container.innerHTML = data.data.map(post => `
+                <div class="post">
+                    <h3>${post.title}</h3>
+                    <p>${post.content}</p>
+                    <small>By: ${post.author}</small>
+                </div>
+            `).join('');
+        }
+
+        function setupPagination(pagination) {
+            const container = document.getElementById('pagination');
+            const { currentPage, totalPages, hasNext, hasPrev } = pagination;
+
+            container.innerHTML = `
+                <button onclick="changePage(${currentPage - 1})" ${!hasPrev ? 'disabled' : ''}>
+                    Previous
+                </button>
+                
+                <span>Page ${currentPage} of ${totalPages}</span>
+                
+                <button onclick="changePage(${currentPage + 1})" ${!hasNext ? 'disabled' : ''}>
+                    Next
+                </button>
+            `;
+        }
+
+        function changePage(newPage) {
+            currentPage = newPage;
+            loadPosts();
+        }
+    </script>
+</body>
+</html>
